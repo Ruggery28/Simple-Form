@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form-Document</title>
+</head>
+<body>
+    
+    <!-- Post method to to send data security and action to tell the submit button where to send -->
+    <form method="POST" action="/submit-form" id="myForm">
+        <label name="">First Name: </label>
+        <input type="text" name="first-name" id="fName"><br>
+        <span class="error" id="fNameError"></span><br><br>
+        <!-- name is used for sending data to server and id for client-side JS manipulation -->
+
+        <label name="">Last Name: </label>
+        <input type="text" name="last-name" id="lName"><br>
+        <span class="error" id="fNameError"></span><br><br>
+
+        <label name="">Email: </label>
+        <input type="email" name="email" id="email"><br>
+        <span class="error" id="lNameError"></span><br><br>
+
+        <label name="">Phone Number: </label>
+        <input type="number" name="phone-number" id="phoneNumber"><br>
+        <span class="error" id="phoneNumberError"></span><br><br>
+
+        <label name="">Eircode: </label>
+        <input type="text" name="eircode" id="eircode"><br>
+        <span class="error" id="eircodeError"></span><br><br>
+
+        <input type="submit" value="SUBMIT" >
+    </form>
+
+    <script src="validation.js"></script>
+</body>
+</html>
