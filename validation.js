@@ -1,4 +1,4 @@
-// validation.js
+// EventListener method to understand and works the form inside the HTML
 
 document.addEventListener('DOMContentLoaded', function() {
     // 1. Get the form element by its ID
@@ -25,17 +25,20 @@ function validateForm()  {
     document.getElementById('phoneNumberError').textContent = '';
     document.getElementById('eircodeError').textContent = '';
 
-    // Get form field values
+    // Variables to get form field values
     const firstName = document.getElementById('fName').value.trim();  
     const lastName = document.getElementById('lName').value.trim();
     const email = document.getElementById('email').value.trim();
     const phoneNumber = document.getElementById('phoneNumber').value.trim();
     const eircode = document.getElementById('eircode').value.trim();
 
-    //Regex
-    const alphaRegex = /^[a-zA-Z0-9]+$/
+    //Regex Format
+    const alphaRegex = /^[a-zA-Z]+$/ //check for alphanumeric characters
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; //check email formart
+    const phoneNumberRegex = /^\d{10}$/; // check 10 numeric digits
+    const eircodeRegex = /^[dD][a-zA-Z0-9]{6}$/; //check the first digit D and then more 6 alphanumeric characters
 
-
+    //All validation using if to check everything first before allowing the submit buttom
     if(firstName.length > 20 || !alphaRegex.test(firstName)){
         fNameError.textContent = "It should only contain 20 characters and be Alphanumberic.";
         isValid = false;
@@ -46,4 +49,20 @@ function validateForm()  {
         isValid = false;
     }
 
+    if(email.length === 0 || !emailRegex.test(email)){ //=== means it won't change the data type before comparing
+        emailError.textContent = "It needs to be in a email formart. Can't be empty!";
+        isValid = false;
+    }
+
+    if(!phoneNumberRegex.test(phoneNumber)){
+        phoneNumberError.textContent = "Phone Number must be 10 characters and only digit number!";
+        isValid = false;
+    }
+
+    if(!eircodeRegex.test(eircode)){
+        eircodeError.textContent = "Eircode must start with letter D and it needs 7 characters total.";
+        isvalid = false;
+    }
+
+    return isValid;
 }
