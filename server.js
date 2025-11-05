@@ -1,52 +1,111 @@
-// --- 1. REQUIRE MODULES/LIBRARIES ---
-// The Express framework is required to build the web server
+// server.js
+// Load environment variables from .env file
+const dotenv = require('dotenv');
+dotenv.config();
+
+// 1. MODULES AND CONNECTION SETUP
+// ----------------------------------------------------
+// Require the mysql2 module - CORRECTED: added quotes
+const mysql = require('mysql2'); 
+
+// Create the pool connection
+const pool = mysql.createPool({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    waitForConnection: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
+
+// Convert the pool.query method to use Promises for cleaner async/await usage
+// CORRECTED: Added parentheses to pool.promise()
+const promisePool = pool.promise(); 
+
+// 2. DATABASE SCHEMA FUNCTION
+// ----------------------------------------------------
+async function createTable() {
+    const createTableQuery = `
+    CREATE TABLE IF NOT EXISTS user_info (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        first_name VARCHAR(20) NOT NULL,
+        last_name VARCHAR(20) NOT NULL,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        phone_number CHAR(10) NOT NULL, 
+        eircode CHAR(7) NOT NULL, 
+        submission_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );`;
+
+    try {
+        await promisePool.query(createTableQuery);
+        console.log("Database table 'user_info' checked/created successfully.");
+    } catch (error) {
+        console.error("Error creating database table:", error);
+    }
+}
+
+// 3. EXPRESS SERVER SETUP
+// ----------------------------------------------------
 const express = require('express');
-// body-parser is required to parse incoming request bodies (form data)
 const bodyParser = require('body-parser');
-
-// --- 2. INITIALIZE APP & CONFIGURATION ---
 const app = express();
-const port = 3000; // Define the port the server will run on
+const port = 3000; 
 
-// --- 3. MIDDLEWARE SETUP ---
-// This tells Express to use body-parser middleware.
-// It parses form data submitted via POST requests and makes it available in req.body.
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// --- 4. POST ROUTE HANDLER (Receives Form Data) ---
-// This handles the POST request sent by your HTML form to the '/submit-form' path.
+// 4. POST ROUTE HANDLER (Receives Form Data)
+// ----------------------------------------------------
 app.post('/submit-form', async (req, res) => {
-    try {
-        // --- DATA ACCESS ---
-        // req.body contains all the form data (first-name, email, etc.)
-        // based on the 'name' attributes you set in your form.
-        const formData = req.body;
-        
-        console.log("Successfully received form data:");
-        console.log(formData);
+    // Destructuring and renaming fields from req.body
+    const { 
+        'first-name': firstName, 
+        'last-name': lastName, 
+        email, 
+        'phone-number': phoneNumber, 
+        eircode 
+    } = req.body;
 
-        // --- SUCCESS RESPONSE ---
-        // Send a success status code (200 OK) and a message back to the client.
-        // This is what prevents the HTTP ERROR 405 on a successful submission.
-        res.status(200).send('Form data received successfully on the server!');
+    // Parameterized INSERT query
+    const insertQuery = `
+        INSERT INTO user_info (first_name, last_name, email, phone_number, eircode)
+        VALUES (?,?,?,?,?)`;
+
+    const data = [firstName, lastName, email, phoneNumber, eircode];
+
+    try {
+        const [result] = await promisePool.query(insertQuery, data);
         
+        console.log(` User inserted successfully. ID: ${result.insertId}`);
+        // Log the received data after the successful insertion
+        console.log("Received form data:", req.body); 
+
+        // Send a success status code (201 Created is often used for successful INSERT)
+        res.status(201).send('Form data received and saved successfully!');
+
     } catch (error) {
-        // --- CATCH/ERROR RESPONSE ---
-        // If an unexpected server error occurs (e.g., failed to process),
-        // send an HTTP 500 status code (Internal Server Error) back to the client.
-        console.error("Error processing form submission:", error);
-        res.status(500).send('Internal Server Error: Failed to process form submission.');
+        // Log the full error to the console
+        console.error("Database insertion failed:", error);
+        
+        // Handle specific unique constraint violation for better UX
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(409).send('Error: This email address is already registered.');
+        }
+
+        // General server error response
+        res.status(500).send('Internal Server Error: Failed to process submission.');
     }
 });
 
-// --- 5. START SERVER LISTENER ---
-// Start the Express server and bind it to the defined port.
-app.listen(port, (err) => {
-    if (err) {
-        // This handles errors like the port being already in use.
-        console.error(`Server startup failed: ${err.message}`);
-        return; 
-    }
-    // Success message for the console.
-    console.log(`Server running on http://localhost:${port}`);
+// 5. START SERVER LISTENER (After creating the table)
+// ----------------------------------------------------
+// Create the table, then start the server
+createTable().then(() => {
+    app.listen(port, (err) => {
+        if (err) {
+            console.error(`Server startup failed: ${err.message}`);
+            return;
+        }
+        console.log(`Server running on http://localhost:${port}`);
+    });
 });

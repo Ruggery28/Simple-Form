@@ -8,7 +8,7 @@
 <body>
     
     <!-- Post method to to send data security and action to tell the submit button where to send -->
-    <form method="POST" action="/submit-form" id="myForm">
+    <form method="POST" action="http://localhost:3000/submit-form" id="myForm">
         <label name="">First Name: </label>
         <input type="text" name="first-name" id="fName"><br>
         <span class="error" id="fNameError"></span><br><br>
@@ -16,11 +16,11 @@
 
         <label name="">Last Name: </label>
         <input type="text" name="last-name" id="lName"><br>
-        <span class="error" id="fNameError"></span><br><br>
+        <span class="error" id="lNameError"></span><br><br>
 
         <label name="">Email: </label>
         <input type="email" name="email" id="email"><br>
-        <span class="error" id="lNameError"></span><br><br>
+        <span class="error" id="emailError"></span><br><br>
 
         <label name="">Phone Number: </label>
         <input type="number" name="phone-number" id="phoneNumber"><br>

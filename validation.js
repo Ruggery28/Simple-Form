@@ -19,11 +19,17 @@ function validateForm()  {
     let isValid = true;
 
     // This is to prevent old error messages from lingering after a fix, creating an empty state.
-    document.getElementById('fNameError').textContent = '';
-    document.getElementById('lNameError').textContent = '';
-    document.getElementById('emailError').textContent = '';
-    document.getElementById('phoneNumberError').textContent = '';
-    document.getElementById('eircodeError').textContent = '';
+    const fNameError = document.getElementById('fNameError');
+    const lNameError = document.getElementById('lNameError');
+    const emailError = document.getElementById('emailError');
+    const phoneNumberError = document.getElementById('phoneNumberError');
+    const eircodeError = document.getElementById('eircodeError');
+
+    fNameError.textContent = "";
+    lNameError.textContent = "";
+    emailError.textContent = "";
+    phoneNumberError.textContent = "";
+    eircodeError.textContent = "";
 
     // Variables to get form field values
     const firstName = document.getElementById('fName').value.trim();  
@@ -61,7 +67,7 @@ function validateForm()  {
 
     if(!eircodeRegex.test(eircode)){
         eircodeError.textContent = "Eircode must start with letter D and it needs 7 characters total.";
-        isvalid = false;
+        isValid = false;
     }
 
     return isValid;
