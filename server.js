@@ -52,6 +52,9 @@ const bodyParser = require('body-parser');
 const app = express();
 const port = 3000; 
 
+// NEW: Middleware to serve static files (like form.html) from the root directory
+app.use(express.static(__dirname)); 
+// Middleware to parse URL-encoded bodies (form submissions)
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // 4. POST ROUTE HANDLER (Receives Form Data)
@@ -81,7 +84,12 @@ app.post('/submit-form', async (req, res) => {
         console.log("Received form data:", req.body); 
 
         // Send a success status code (201 Created is often used for successful INSERT)
-        res.status(201).send('Form data received and saved successfully!');
+        //res.status(201).send('Form data received and saved successfully!');
+        res.send(`
+            <h1>Submission Successful!</h1>
+            <p>Thank you, ${firstName}. Your data has been saved.</p>
+            <p><a href="form.html">Go back to the form</a></p>
+        `);
 
     } catch (error) {
         // Log the full error to the console
@@ -92,8 +100,11 @@ app.post('/submit-form', async (req, res) => {
             return res.status(409).send('Error: This email address is already registered.');
         }
 
-        // General server error response
-        res.status(500).send('Internal Server Error: Failed to process submission.');
+        res.status(500).send(`
+            <h1>Submission Failed</h1>
+            <p>${userMessage}</p>
+            <p><a href="/">Go back to the form</a></p>
+        `);
     }
 });
 
